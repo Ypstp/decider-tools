@@ -1,0 +1,6 @@
+{
+  "name": "DeciderTools",
+  "description": "Tactile decision-making games and precision randomizers: Wheel of Fortune, Roulette, Spin the Bottle, Mystery Cards, Dice, Coin Flip, Cup & Ball, Number Draw, Choice Picker, Password & Color Generators.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

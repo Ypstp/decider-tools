@@ -1,0 +1,1906 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><span style="color: #000000;">Decider</span><span style="color: #0084ff;">Tools</span></title>
+    <!-- Favicon: small spinning wheel of fortune icon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230084ff'/%3E%3Cpath d='M16 2v14h14A14 14 0 0 0 16 2z' fill='%23ffffff' opacity='0.8'/%3E%3Cpath d='M16 30V16H2a14 14 0 0 0 14 14z' fill='%230055bb'/%3E%3Ccircle cx='16' cy='16' r='4' fill='%23ffffff'/%3E%3C/svg%3E">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #0f1117;
+            --bg-surface: #181b25;
+            --bg-card: #202433;
+            --bg-card-hover: #262c3d;
+            --border: #2e354a;
+            --border-hover: #404a63;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --primary: #0084ff;
+            --primary-hover: #006dd6;
+            --primary-glow: rgba(0, 132, 255, 0.25);
+            --accent: #10b981;
+            --danger: #ef4444;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --transition-speed: 0.3s;
+        }
+
+        [data-theme="light"] {
+            --bg-base: #f8fafc;
+            --bg-surface: #ffffff;
+            --bg-card: #f1f5f9;
+            --bg-card-hover: #e2e8f0;
+            --border: #cbd5e1;
+            --border-hover: #94a3b8;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --primary: #0066cc;
+            --primary-hover: #0052a3;
+            --primary-glow: rgba(0, 102, 204, 0.2);
+            --accent: #059669;
+            --danger: #dc2626;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            position: relative;
+        }
+
+        /* Sidebar Styling */
+        aside {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background-color: var(--bg-surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            transition: transform var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        aside.collapsed {
+            transform: translateX(calc(-1 * var(--sidebar-width)));
+        }
+
+        .brand-area {
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 800;
+            font-size: 1.25rem;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #0084ff, #0055bb);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: spin-slow 12s linear infinite;
+        }
+        @keyframes spin-slow { 100% { transform: rotate(360deg); } }
+
+        .logo-text span.decider { color: var(--text-main); }
+        .logo-text span.tools { color: var(--primary); }
+
+        .nav-links {
+            flex: 1;
+            padding: 1.5rem 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.85rem 1rem;
+            border-radius: 10px;
+            color: var(--text-muted);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            width: 100%;
+            text-align: left;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item:hover {
+            background-color: var(--bg-card);
+            color: var(--text-main);
+        }
+
+        .nav-item.active {
+            background-color: var(--primary);
+            color: #ffffff;
+            box-shadow: 0 4px 12px var(--primary-glow);
+        }
+
+        .nav-item svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-footer {
+            padding: 1rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .icon-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .icon-btn:hover {
+            border-color: var(--primary);
+            background: var(--bg-card-hover);
+        }
+
+        /* Main Container */
+        .main-wrapper {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: margin-left var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .main-wrapper.expanded {
+            margin-left: 0;
+        }
+
+        header.top-header {
+            height: var(--header-height);
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            background-color: var(--bg-surface);
+            position: sticky;
+            top: 0;
+            z-index: 90;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .view-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        /* Content Views */
+        .content-area {
+            flex: 1;
+            padding: 2.5rem;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .view-panel {
+            display: none;
+        }
+
+        .view-panel.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .game-card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.75rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+
+        .game-card-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--bg-card);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+        }
+
+        .game-card h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+        .game-card p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        /* Game UI common layout */
+        .game-container {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        @media(max-width: 1024px) {
+            .game-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .game-stage {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 450px;
+            position: relative;
+        }
+
+        .game-sidebar {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .control-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        input[type="text"], textarea, select {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+            width: 100%;
+        }
+
+        input[type="text"]:focus, textarea:focus, select:focus {
+            border-color: var(--primary);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+            box-shadow: 0 4px 12px var(--primary-glow);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-hover);
+            box-shadow: none;
+        }
+
+        .back-btn-row {
+            margin-bottom: 1rem;
+        }
+
+        /* Winner Display Banner */
+        .winner-display {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-align: center;
+            margin: 1.5rem 0;
+            min-height: 2.5rem;
+            text-shadow: 0 0 20px var(--primary-glow);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* History Log */
+        .history-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .history-item {
+            padding: 0.4rem 0.6rem;
+            background: var(--bg-surface);
+            border-radius: 6px;
+            border-left: 3px solid var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* 3D Coin CSS */
+        .coin-scene {
+            width: 160px;
+            height: 160px;
+            perspective: 1000px;
+            margin: 2rem 0;
+            cursor: pointer;
+        }
+
+        .coin {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 1.5s cubic-bezier(0.15, 0.85, 0.25, 1.15);
+        }
+
+        .coin-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.5rem;
+            backface-visibility: hidden;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.3), 0 10px 20px rgba(0,0,0,0.3);
+            border: 6px solid #eab308;
+        }
+
+        .coin-face.heads {
+            background: #facc15;
+            color: #854d0e;
+        }
+
+        .coin-face.tails {
+            background: #cbd5e1;
+            color: #334155;
+            border-color: #94a3b8;
+            transform: rotateY(180deg);
+        }
+
+        /* 3D Dice CSS */
+        .dice-scene {
+            width: 120px;
+            height: 120px;
+            perspective: 1000px;
+            margin: 2.5rem 0;
+            cursor: pointer;
+        }
+
+        .dice {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 1.2s cubic-bezier(0.15, 0.85, 0.25, 1.15);
+        }
+
+        .dice-face {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            background: #ffffff;
+            border: 2px solid #cbd5e1;
+            border-radius: 16px;
+            display: grid;
+            grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+            padding: 12px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1), 0 8px 16px rgba(0,0,0,0.15);
+        }
+
+        .dot {
+            background: #1e293b;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            align-self: center;
+            justify-self: center;
+        }
+
+        /* Dice face dot mappings */
+        .face-1 { transform: rotateY(0deg) translateZ(60px); }
+        .face-1 .dot-center { grid-area: 2 / 2; }
+
+        .face-6 { transform: rotateY(180deg) translateZ(60px); }
+        .face-6 .d1 { grid-area: 1 / 1; }
+        .face-6 .d2 { grid-area: 1 / 3; }
+        .face-6 .d3 { grid-area: 2 / 1; }
+        .face-6 .d4 { grid-area: 2 / 3; }
+        .face-6 .d5 { grid-area: 3 / 1; }
+        .face-6 .d6 { grid-area: 3 / 3; }
+
+        .face-3 { transform: rotateY(90deg) translateZ(60px); }
+        .face-3 .d1 { grid-area: 1 / 1; }
+        .face-3 .d2 { grid-area: 2 / 2; }
+        .face-3 .d3 { grid-area: 3 / 3; }
+
+        .face-4 { transform: rotateY(-90deg) translateZ(60px); }
+        .face-4 .d1 { grid-area: 1 / 1; }
+        .face-4 .d2 { grid-area: 1 / 3; }
+        .face-4 .d3 { grid-area: 3 / 1; }
+        .face-4 .d4 { grid-area: 3 / 3; }
+
+        .face-2 { transform: rotateX(90deg) translateZ(60px); }
+        .face-2 .d1 { grid-area: 1 / 1; }
+        .face-2 .d2 { grid-area: 3 / 3; }
+
+        .face-5 { transform: rotateX(-90deg) translateZ(60px); }
+        .face-5 .d1 { grid-area: 1 / 1; }
+        .face-5 .d2 { grid-area: 1 / 3; }
+        .face-5 .d3 { grid-area: 2 / 2; }
+        .face-5 .d4 { grid-area: 3 / 1; }
+        .face-5 .d5 { grid-area: 3 / 3; }
+
+        /* Wheel Canvas */
+        .wheel-container {
+            position: relative;
+            width: 320px;
+            height: 320px;
+            margin: 1rem auto;
+        }
+
+        #wheelCanvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .wheel-pointer {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 14px solid transparent;
+            border-right: 14px solid transparent;
+            border-top: 26px solid var(--primary);
+            z-index: 10;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+        }
+
+        /* Roulette Track */
+        .roulette-viewport {
+            width: 100%;
+            max-width: 600px;
+            height: 120px;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+            margin: 2rem 0;
+        }
+
+        .roulette-indicator {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 4px;
+            background: var(--primary);
+            transform: translateX(-50%);
+            z-index: 5;
+            box-shadow: 0 0 12px var(--primary);
+        }
+
+        .roulette-strip {
+            display: flex;
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            will-change: transform;
+        }
+
+        .roulette-card-item {
+            width: 110px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            border-right: 1px solid var(--border);
+            background: var(--bg-surface);
+            padding: 0 10px;
+            text-align: center;
+            word-break: break-all;
+        }
+
+        /* Modal styling */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            transform: scale(0.95);
+            transition: transform 0.25s ease;
+        }
+
+        .modal-overlay.open .modal {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .modal-body {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .setting-row:last-child {
+            border-bottom: none;
+        }
+
+        /* Responsive helper */
+        @media(max-width: 768px) {
+            aside {
+                transform: translateX(calc(-1 * var(--sidebar-width)));
+            }
+            aside.mobile-open {
+                transform: translateX(0);
+            }
+            .main-wrapper {
+                margin-left: 0 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar">
+        <div class="brand-area">
+            <a href="#" class="logo" onclick="switchView('dashboard'); return false;">
+                <div class="logo-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                </div>
+                <div class="logo-text">
+                    <span class="decider">Decider</span><span class="tools">Tools</span>
+                </div>
+            </a>
+            <button class="icon-btn" id="sidebarCloseBtn" title="Toggle Sidebar">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+        </div>
+        <div class="nav-links" id="navLinksContainer">
+            <!-- Dynamically populated or static nav buttons -->
+        </div>
+        <div class="sidebar-footer">
+            <button class="icon-btn" id="themeToggleBtn" title="Toggle Theme">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            </button>
+            <button class="icon-btn" id="soundToggleBtn" title="Toggle Sound">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            </button>
+            <button class="icon-btn" id="settingsBtn" title="Settings">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c0 .69.41 1.3 1.03 1.51h.07a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.07a1.65 1.65 0 0 0-1.03 1.51z"/></svg>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Wrapper -->
+    <div class="main-wrapper" id="mainWrapper">
+        <header class="top-header">
+            <div class="header-left">
+                <button class="icon-btn" id="sidebarToggleBtn" title="Toggle Sidebar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                </button>
+                <h1 class="view-title" id="viewTitle">Dashboard</h1>
+            </div>
+        </header>
+
+        <div class="content-area">
+            <!-- 1. Dashboard View -->
+            <div id="view-dashboard" class="view-panel active">
+                <div class="dashboard-grid" id="dashboardGrid">
+                    <!-- Cards populated via JS -->
+                </div>
+            </div>
+
+            <!-- 2. Wheel of Fortune -->
+            <div id="view-wheel" class="view-panel">
+                <div class="back-btn-row">
+                    <button class="btn btn-secondary" style="width: auto;" onclick="switchView('dashboard')">← <span data-i18n="backToMenu">Back to Menu</span></button>
+                </div>
+                <div class="game-container">
+                    <div class="game-stage">
+                        <div class="wheel-container">
+                            <div class="wheel-pointer"></div>
+                            <canvas id="wheelCanvas" width="400" height="400"></canvas>
+                        </div>
+                        <div class="winner-display" id="wheelWinner">-</div>
+                        <button class="btn" id="spinWheelBtn" style="max-width: 200px;" data-i18n="spinWheel">Spin Wheel</button>
+                    </div>
+                    <div class="game-sidebar">
+                        <div class="control-group">
+                            <label data-i18n="optionsList">Options (one per line)</label>
+                            <textarea id="wheelOptions">Option 1
+Option 2
+Option 3
+Option 4
+Option 5
+Option 6</textarea>
+                        </div>
+                        <button class="btn btn-secondary" id="updateWheelBtn" data-i18n="updateWheel">Update Wheel</button>
+                        <div class="control-group">
+                            <label data-i18n="history">History</label>
+                            <div class="history-box" id="wheelHistory"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Roulette -->
+            <div id="view-roulette" class="view-panel">
+                <div class="back-btn-row">
+                    <button class="btn btn-secondary" style="width: auto;" onclick="switchView('dashboard')">← <span data-i18n="backToMenu">Back to Menu</span></button>
+                </div>
+                <div class="game-container">
+                    <div class="game-stage">
+                        <div class="roulette-viewport">
+                            <div class="roulette-indicator"></div>
+                            <div class="roulette-strip" id="rouletteStrip"></div>
+                        </div>
+                        <div class="winner-display" id="rouletteWinner">-</div>
+                        <button class="btn" id="spinRouletteBtn" style="max-width: 200px;" data-i18n="spinRoulette">Start Roulette</button>
+                    </div>
+                    <div class="game-sidebar">
+                        <div class="control-group">
+                            <label data-i18n="itemsList">Items (one per line)</label>
+                            <textarea id="rouletteItems">10
+20
+30
+40
+50
+60
+70
+80
+90
+100</textarea>
+                        </div>
+                        <button class="btn btn-secondary" id="updateRouletteBtn" data-i18n="updateItems">Update Items</button>
+                        <div class="control-group">
+                            <label data-i18n="history">History</label>
+                            <div class="history-box" id="rouletteHistory"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Dice Roll -->
+            <div id="view-dice" class="view-panel">
+                <div class="back-btn-row">
+                    <button class="btn btn-secondary" style="width: auto;" onclick="switchView('dashboard')">← <span data-i18n="backToMenu">Back to Menu</span></button>
+                </div>
+                <div class="game-container">
+                    <div class="game-stage" id="diceStageContainer" style="flex-direction: row; gap: 2rem; flex-wrap: wrap;">
+                        <!-- 3D Dices inserted here -->
+                    </div>
+                    <div class="game-sidebar">
+                        <div class="control-group">
+                            <label data-i18n="diceCount">Number of Dice</label>
+                            <select id="diceCountSelect">
+                                <option value="1">1 Dice</option>
+                                <option value="2" selected>2 Dice</option>
+                                <option value="3">3 Dice</option>
+                            </select>
+                        </div>
+                        <button class="btn" id="rollDiceBtn" data-i18n="rollDice">Roll Dice</button>
+                        <div class="winner-display" id="diceWinner" style="font-size: 1.5rem; margin: 0.5rem 0;">-</div>
+                        <div class="control-group">
+                            <label data-i18n="history">History</label>
+                            <div class="history-box" id="diceHistory"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Coin Flip -->
+            <div id="view-coin" class="view-panel">
+                <div class="back-btn-row">
+                    <button class="btn btn-secondary" style="width: auto;" onclick="switchView('dashboard')">← <span data-i18n="backToMenu">Back to Menu</span></button>
+                </div>
+                <div class="game-container">
+                    <div class="game-stage">
+                        <div class="coin-scene" id="coinScene">
+                            <div class="coin" id="coinElement">
+                                <div class="coin-face heads" data-i18n="heads">HEADS</div>
+                                <div class="coin-face tails" data-i18n="tails">TAILS</div>
+                            </div>
+                        </div>
+                        <div class="winner-display" id="coinWinner">-</div>
+                        <button class="btn" id="flipCoinBtn" style="max-width: 200px;" data-i18n="flipCoin">Flip Coin</button>
+                    </div>
+                    <div class="game-sidebar">
+                        <div class="control-group">
+                            <label data-i18n="coinType">Coin Type</label>
+                            <select id="coinTypeSelect">
+                                <option value="standard" data-i18n="standardCoin">Standard (Heads / Tails)</option>
+                                <option value="euro">Euro / Dollar</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label data-i18n="history">History</label>
+                            <div class="history-box" id="coinHistory"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. Random Number -->
+            <div id="view-number" class="view-panel">
+                <div class="back-btn-row">
+                    <button class="btn btn-secondary" style="width: auto;" onclick="switchView('dashboard')">← <span data-i18n="backToMenu">Back to Menu</span></button>
+                </div>
+                <div class="game-container">
+                    <div class="game-stage">
+                        <div class="winner-display" id="numberWinner" style="font-size: 4rem;">?</div>
+                        <button class="btn" id="generateNumberBtn" style="max-width: 200px;" data-i18n="generate">Generate</button>
+                    </div>
+                    <div class="game-sidebar">
+                        <div class="control-group">
+                            <label data-i18n="minValue">Minimum Value</label>
+                            <input type="text" id="numMin" value="1">
+                        </div>
+                        <div class="control-group">
+                            <label data-i18n="maxValue">Maximum Value</label>
+                            <input type="text" id="numMax" value="100">
+                        </div>
+                        <div class="control-group">
+                            <label data-i18n="history">History</label>
+                            <div class="history-box" id="numberHistory"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7. Random Choice -->
+            <div id="view-choice" class="view-panel">
+                <div class="back-btn-row">
+                    <button class="btn btn-secondary" style="width: auto;" onclick="switchView('dashboard')">← <span data-i18n="backToMenu">Back to Menu</span></button>
+                </div>
+                <div class="game-container">
+                    <div class="game-stage">
+                        <div class="winner-display" id="choiceWinner">-</div>
+                        <button class="btn" id="pickChoiceBtn" style="max-width: 200px;" data-i18n="pickRandom">Pick Random</button>
+                    </div>
+                    <div class="game-sidebar">
+                        <div class="control-group">
+                            <label data-i18n="optionsList">Options (one per line)</label>
+                            <textarea id="choiceOptions">Pizza
+Burger
+Sushi
+Tacos
+Pasta
+Salad</textarea>
+                        </div>
+                        <div class="control-group">
+                            <label data-i18n="history">History</label>
+                            <div class="history-box" id="choiceHistory"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 8. Password Generator -->
+            <div id="view-password" class="view-panel">
+                <div class="back-btn-row">
+                    <button class="btn btn-secondary" style="width: auto;" onclick="switchView('dashboard')">← <span data-i18n="backToMenu">Back to Menu</span></button>
+                </div>
+                <div class="game-container">
+                    <div class="game-stage">
+                        <div class="winner-display" id="passwordWinner" style="font-size: 1.75rem; word-break: break-all; text-align: center;">-</div>
+                        <div style="display: flex; gap: 1rem; width: 100%; max-width: 350px;">
+                            <button class="btn" id="generatePasswordBtn" data-i18n="generate">Generate</button>
+                            <button class="btn btn-secondary" id="copyPasswordBtn" data-i18n="copy">Copy</button>
+                        </div>
+                    </div>
+                    <div class="game-sidebar">
+                        <div class="control-group">
+                            <label data-i18n="passwordLength">Length: <span id="pwdLenVal">16</span></label>
+                            <input type="range" id="pwdLength" min="6" max="64" value="16" style="width: 100%;">
+                        </div>
+                        <div class="setting-row">
+                            <label data-i18n="uppercase">Uppercase (A-Z)</label>
+                            <input type="checkbox" id="pwdUpper" checked>
+                        </div>
+                        <div class="setting-row">
+                            <label data-i18n="lowercase">Lowercase (a-z)</label>
+                            <input type="checkbox" id="pwdLower" checked>
+                        </div>
+                        <div class="setting-row">
+                            <label data-i18n="numbers">Numbers (0-9)</label>
+                            <input type="checkbox" id="pwdNumbers" checked>
+                        </div>
+                        <div class="setting-row">
+                            <label data-i18n="symbols">Symbols (!@#)</label>
+                            <input type="checkbox" id="pwdSymbols" checked>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 9. Color Generator -->
+            <div id="view-color" class="view-panel">
+                <div class="back-btn-row">
+                    <button class="btn btn-secondary" style="width: auto;" onclick="switchView('dashboard')">← <span data-i18n="backToMenu">Back to Menu</span></button>
+                </div>
+                <div class="game-container">
+                    <div class="game-stage" id="colorStage" style="background-color: #3b82f6; transition: background-color 0.5s;">
+                        <div class="winner-display" id="colorWinner" style="color: #ffffff; text-shadow: 0 2px 10px rgba(0,0,0,0.5);">#3B82F6</div>
+                        <button class="btn" id="generateColorBtn" style="max-width: 200px;" data-i18n="generate">Generate</button>
+                    </div>
+                    <div class="game-sidebar">
+                        <div class="control-group">
+                            <label data-i18n="colorFormats">Color Details</label>
+                            <div class="history-box" id="colorFormatsBox" style="font-size: 0.9rem;">
+                                <div>HEX: <span id="valHex">#3B82F6</span></div>
+                                <div>RGB: <span id="valRgb">rgb(59, 130, 246)</span></div>
+                                <div>HSL: <span id="valHsl">hsl(217, 91%, 60%)</span></div>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label data-i18n="history">History</label>
+                            <div class="history-box" id="colorHistory"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 data-i18n="settingsTitle">Settings</h2>
+                <button class="icon-btn" id="closeSettingsModal">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-row">
+                    <label data-i18n="language">Language</label>
+                    <select id="langSelect" style="width: 140px;">
+                        <option value="en">English</option>
+                        <option value="ru">Русский</option>
+                        <option value="es">Español</option>
+                        <option value="de">Deutsch</option>
+                        <option value="fr">Français</option>
+                    </select>
+                </div>
+                <div class="setting-row">
+                    <label data-i18n="soundEffects">Sound Effects</label>
+                    <input type="checkbox" id="soundEnabledCheck" checked>
+                </div>
+                <div class="setting-row">
+                    <label data-i18n="shortcutKey">Quick Action Shortcut</label>
+                    <input type="text" id="shortcutInput" value="Space" style="width: 100px; text-align: center;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Translations Dictionary ---
+        const i18n = {
+            en: {
+                dashboard: "Dashboard",
+                wheel: "Wheel of Fortune",
+                wheelDesc: "Spin the custom wheel to pick an option",
+                roulette: "Roulette",
+                rouletteDesc: "Tactile track spin with items",
+                dice: "Dice Roll",
+                diceDesc: "Roll 3D physics-based dice",
+                coin: "Coin Flip",
+                coinDesc: "Flip a 3D coin for Heads or Tails",
+                number: "Random Number",
+                numberDesc: "Generate random numbers in custom range",
+                choice: "Random Choice",
+                choiceDesc: "Pick a random item from list",
+                password: "Password Generator",
+                passwordDesc: "Create secure custom passwords",
+                color: "Color Generator",
+                colorDesc: "Generate random vibrant colors",
+                backToMenu: "Back to Menu",
+                spinWheel: "Spin Wheel",
+                optionsList: "Options (one per line)",
+                updateWheel: "Update Wheel",
+                history: "History",
+                spinRoulette: "Start Roulette",
+                itemsList: "Items (one per line)",
+                updateItems: "Update Items",
+                diceCount: "Number of Dice",
+                rollDice: "Roll Dice",
+                coinType: "Coin Type",
+                standardCoin: "Standard (Heads / Tails)",
+                heads: "HEADS",
+                tails: "TAILS",
+                flipCoin: "Flip Coin",
+                minValue: "Minimum Value",
+                maxValue: "Maximum Value",
+                generate: "Generate",
+                pickRandom: "Pick Random",
+                copy: "Copy",
+                passwordLength: "Length",
+                uppercase: "Uppercase (A-Z)",
+                lowercase: "Lowercase (a-z)",
+                numbers: "Numbers (0-9)",
+                symbols: "Symbols (!@#)",
+                colorFormats: "Color Details",
+                settingsTitle: "Settings",
+                language: "Language",
+                soundEffects: "Sound Effects",
+                shortcutKey: "Shortcut Key"
+            },
+            ru: {
+                dashboard: "Панель",
+                wheel: "Колесо Фортуны",
+                wheelDesc: "Крутите колесо для выбора варианта",
+                roulette: "Рулетка",
+                rouletteDesc: "Плавная рулетка с элементами",
+                dice: "Бросок Костей",
+                diceDesc: "Бросайте 3D кости",
+                coin: "Подбросить Монетку",
+                coinDesc: "Орёл или решка на 3D монете",
+                number: "Случайное Число",
+                numberDesc: "Генерация чисел в диапазоне",
+                choice: "Случайный Выбор",
+                choiceDesc: "Выбор случайного пункта из списка",
+                password: "Генератор Паролей",
+                passwordDesc: "Создание надежных паролей",
+                color: "Генератор Цветов",
+                colorDesc: "Генерация ярких случайных цветов",
+                backToMenu: "В меню",
+                spinWheel: "Вращать колесо",
+                optionsList: "Варианты (по одному на строку)",
+                updateWheel: "Обновить колесо",
+                history: "История",
+                spinRoulette: "Запустить рулетку",
+                itemsList: "Элементы (по одному на строку)",
+                updateItems: "Обновить список",
+                diceCount: "Количество костей",
+                rollDice: "Бросить кости",
+                coinType: "Тип монеты",
+                standardCoin: "Стандарт (Орёл / Решка)",
+                heads: "ОРЁЛ",
+                tails: "РЕШКА",
+                flipCoin: "Подбросить",
+                minValue: "Минимум",
+                maxValue: "Максимум",
+                generate: "Сгенерировать",
+                pickRandom: "Выбрать",
+                copy: "Копировать",
+                passwordLength: "Длина",
+                uppercase: "Заглавные (A-Z)",
+                lowercase: "Строчные (a-z)",
+                numbers: "Цифры (0-9)",
+                symbols: "Символы (!@#)",
+                colorFormats: "Цветовые коды",
+                settingsTitle: "Настройки",
+                language: "Язык",
+                soundEffects: "Звуковые эффекты",
+                shortcutKey: "Горячая клавиша"
+            },
+            es: {
+                dashboard: "Panel",
+                wheel: "Ruleta de la Fortuna",
+                wheelDesc: "Gira la rueda para elegir una opción",
+                roulette: "Ruleta",
+                rouletteDesc: "Giro táctil con elementos",
+                dice: "Tirar Dados",
+                diceDesc: "Lanza dados 3D con físicas",
+                coin: "Lanzar Moneda",
+                coinDesc: "Cara o cruz en moneda 3D",
+                number: "Número Aleatorio",
+                numberDesc: "Genera números en rango personalizado",
+                choice: "Elección Aleatoria",
+                choiceDesc: "Elige un elemento al azar",
+                password: "Generador de Contraseñas",
+                passwordDesc: "Crea contraseñas seguras",
+                color: "Generador de Color",
+                colorDesc: "Genera colores vibrantes aleatorios",
+                backToMenu: "Volver al menú",
+                spinWheel: "Girar rueda",
+                optionsList: "Opciones (una por línea)",
+                updateWheel: "Actualizar rueda",
+                history: "Historial",
+                spinRoulette: "Iniciar ruleta",
+                itemsList: "Elementos (uno por línea)",
+                updateItems: "Actualizar elementos",
+                diceCount: "Número de dados",
+                rollDice: "Lanzar dados",
+                coinType: "Tipo de moneda",
+                standardCoin: "Estándar (Cara / Cruz)",
+                heads: "CARA",
+                tails: "CRUZ",
+                flipCoin: "Lanzar moneda",
+                minValue: "Valor mínimo",
+                maxValue: "Valor máximo",
+                generate: "Generar",
+                pickRandom: "Elegir al azar",
+                copy: "Copiar",
+                passwordLength: "Longitud",
+                uppercase: "Mayúsculas (A-Z)",
+                lowercase: "Minúsculas (a-z)",
+                numbers: "Números (0-9)",
+                symbols: "Símbolos (!@#)",
+                colorFormats: "Detalles de color",
+                settingsTitle: "Ajustes",
+                language: "Idioma",
+                soundEffects: "Efectos de sonido",
+                shortcutKey: "Atajo de teclado"
+            },
+            de: {
+                dashboard: "Übersicht",
+                wheel: "Glücksrad",
+                wheelDesc: "Drehe das Rad für eine Auswahl",
+                roulette: "Roulette",
+                rouletteDesc: "Taktischer Track mit Elementen",
+                dice: "Würfeln",
+                diceDesc: "Würfle mit 3D Physik",
+                coin: "Münzwurf",
+                coinDesc: "Kopf oder Zahl mit 3D Münze",
+                number: "Zufallszahl",
+                numberDesc: "Generiere Zahlen in individuellem Bereich",
+                choice: "Zufallsauswahl",
+                choiceDesc: "Wähle ein zufälliges Element",
+                password: "Passwort-Generator",
+                passwordDesc: "Erstelle sichere Passwörter",
+                color: "Farb-Generator",
+                colorDesc: "Generiere lebendige Zufallsfarben",
+                backToMenu: "Zurück zum Menü",
+                spinWheel: "Rad drehen",
+                optionsList: "Optionen (eine pro Zeile)",
+                updateWheel: "Rad aktualisieren",
+                history: "Verlauf",
+                spinRoulette: "Roulette starten",
+                itemsList: "Elemente (eine pro Zeile)",
+                updateItems: "Elemente aktualisieren",
+                diceCount: "Anzahl der Würfel",
+                rollDice: "Würfeln",
+                coinType: "Münztyp",
+                standardCoin: "Standard (Kopf / Zahl)",
+                heads: "KOPF",
+                tails: "ZAHL",
+                flipCoin: "Münze werfen",
+                minValue: "Minimalwert",
+                maxValue: "Maximalwert",
+                generate: "Generieren",
+                pickRandom: "Zufällig wählen",
+                copy: "Kopieren",
+                passwordLength: "Länge",
+                uppercase: "Großbuchstaben (A-Z)",
+                lowercase: "Kleinbuchstaben (a-z)",
+                numbers: "Zahlen (0-9)",
+                symbols: "Symbole (!@#)",
+                colorFormats: "Farbdetails",
+                settingsTitle: "Einstellungen",
+                language: "Sprache",
+                soundEffects: "Soundeffekte",
+                shortcutKey: "Tastenkombination"
+            },
+            fr: {
+                dashboard: "Tableau de bord",
+                wheel: "Roue de la Fortune",
+                wheelDesc: "Faites tourner la roue pour choisir",
+                roulette: "Roulette",
+                rouletteDesc: "Roulette fluide avec éléments",
+                dice: "Lancer de Dés",
+                diceDesc: "Lancez des dés 3D",
+                coin: "Pile ou Face",
+                coinDesc: "Lancez une pièce 3D",
+                number: "Nombre Aléatoire",
+                numberDesc: "Générez des nombres personnalisés",
+                choice: "Choix Aléatoire",
+                choiceDesc: "Sélectionnez un élément au hasard",
+                password: "Générateur de Mot de Passe",
+                passwordDesc: "Créez des mots de passe sécurisés",
+                color: "Générateur de Couleur",
+                colorDesc: "Générez des couleurs aléatoires",
+                backToMenu: "Retour au menu",
+                spinWheel: "Tourner la roue",
+                optionsList: "Options (une par ligne)",
+                updateWheel: "Mettre à jour",
+                history: "Historique",
+                spinRoulette: "Lancer la roulette",
+                itemsList: "Éléments (un par ligne)",
+                updateItems: "Mettre à jour",
+                diceCount: "Nombre de dés",
+                rollDice: "Lancer les dés",
+                coinType: "Type de pièce",
+                standardCoin: "Standard (Pile / Face)",
+                heads: "PILE",
+                tails: "FACE",
+                flipCoin: "Lancer la pièce",
+                minValue: "Valeur min",
+                maxValue: "Valeur max",
+                generate: "Générer",
+                pickRandom: "Choisir",
+                copy: "Copier",
+                passwordLength: "Longueur",
+                uppercase: "Majuscules (A-Z)",
+                lowercase: "Minuscules (a-z)",
+                numbers: "Chiffres (0-9)",
+                symbols: "Symboles (!@#)",
+                colorFormats: "Détails de couleur",
+                settingsTitle: "Paramètres",
+                language: "Langue",
+                soundEffects: "Effets sonores",
+                shortcutKey: "Raccourci"
+            }
+        };
+
+        // --- App State & Storage ---
+        const games = [
+            { id: 'wheel', icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>` },
+            { id: 'roulette', icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="12" y1="4" x2="12" y2="20"/></svg>` },
+            { id: 'dice', icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8" cy="8" r="1.5"/><circle cx="16" cy="16" r="1.5"/></svg>` },
+            { id: 'coin', icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 6v12"/></svg>` },
+            { id: 'number', icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h16M12 4v16"/></svg>` },
+            { id: 'choice', icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>` },
+            { id: 'password', icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>` },
+            { id: 'color', icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>` }
+        ];
+
+        let state = {
+            theme: localStorage.getItem('dt_theme') || 'dark',
+            lang: localStorage.getItem('dt_lang') || 'en',
+            sound: localStorage.getItem('dt_sound') !== 'false',
+            shortcut: localStorage.getItem('dt_shortcut') || 'Space',
+            history: JSON.parse(localStorage.getItem('dt_history') || '{}')
+        };
+
+        // Web Audio API Sound Engine
+        let audioCtx = null;
+        function playSound(type = 'click') {
+            if (!state.sound) return;
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+                if (type === 'click') {
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                    osc.start(now);
+                    osc.stop(now + 0.05);
+                } else if (type === 'spin') {
+                    osc.frequency.setValueAtTime(300 + Math.random() * 200, now);
+                    gain.gain.setValueAtTime(0.05, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                } else if (type === 'win') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                    osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+                    osc.start(now);
+                    osc.stop(now + 0.4);
+                }
+            } catch(e) {}
+        }
+
+        // --- Initialization & UI Binding ---
+        document.addEventListener('DOMContentLoaded', () => {
+            applyTheme(state.theme);
+            applyLang(state.lang);
+            buildSidebar();
+            buildDashboard();
+            initWheel();
+            initRoulette();
+            initDice();
+            initCoin();
+            initNumber();
+            initChoice();
+            initPassword();
+            initColor();
+            initSettingsModal();
+            loadAllHistories();
+
+            // Sidebar toggles
+            document.getElementById('sidebarToggleBtn').addEventListener('click', () => {
+                const sidebar = document.getElementById('sidebar');
+                const main = document.getElementById('mainWrapper');
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.toggle('mobile-open');
+                } else {
+                    sidebar.classList.toggle('collapsed');
+                    main.classList.toggle('expanded');
+                }
+                playSound('click');
+            });
+
+            document.getElementById('sidebarCloseBtn').addEventListener('click', () => {
+                const sidebar = document.getElementById('sidebar');
+                const main = document.getElementById('mainWrapper');
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.remove('mobile-open');
+                } else {
+                    sidebar.classList.toggle('collapsed');
+                    main.classList.toggle('expanded');
+                }
+                playSound('click');
+            });
+
+            document.getElementById('themeToggleBtn').addEventListener('click', () => {
+                state.theme = state.theme === 'dark' ? 'light' : 'dark';
+                localStorage.setItem('dt_theme', state.theme);
+                applyTheme(state.theme);
+                playSound('click');
+            });
+
+            document.getElementById('soundToggleBtn').addEventListener('click', () => {
+                state.sound = !state.sound;
+                localStorage.setItem('dt_sound', state.sound);
+                playSound('click');
+            });
+
+            // Global shortcut listener
+            window.addEventListener('keydown', (e) => {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                const activeView = document.querySelector('.view-panel.active').id;
+                if (e.key === ' ' || e.key === 'Enter') {
+                    e.preventDefault();
+                    triggerActiveAction(activeView);
+                }
+            });
+        });
+
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+        }
+
+        function applyLang(lang) {
+            state.lang = lang;
+            document.documentElement.setAttribute('data-lang', lang);
+            localStorage.setItem('dt_lang', lang);
+            
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (i18n[lang][key]) {
+                    el.textContent = i18n[lang][key];
+                }
+            });
+
+            buildSidebar();
+            buildDashboard();
+        }
+
+        function buildSidebar() {
+            const container = document.getElementById('navLinksContainer');
+            container.innerHTML = `
+                <button class="nav-item ${document.getElementById('view-dashboard').classList.contains('active') ? 'active' : ''}" onclick="switchView('dashboard')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    <span data-i18n="dashboard">${i18n[state.lang].dashboard}</span>
+                </button>
+            `;
+            games.forEach(g => {
+                const isActive = document.getElementById(`view-${g.id}`).classList.contains('active');
+                container.innerHTML += `
+                    <button class="nav-item ${isActive ? 'active' : ''}" onclick="switchView('${g.id}')">
+                        ${g.icon}
+                        <span data-i18n="${g.id}">${i18n[state.lang][g.id]}</span>
+                    </button>
+                `;
+            });
+        }
+
+        function buildDashboard() {
+            const grid = document.getElementById('dashboardGrid');
+            grid.innerHTML = '';
+            games.forEach(g => {
+                grid.innerHTML += `
+                    <div class="game-card" onclick="switchView('${g.id}')">
+                        <div class="game-card-icon">${g.icon}</div>
+                        <h3>${i18n[state.lang][g.id]}</h3>
+                        <p>${i18n[state.lang][g.id + 'Desc'] || ''}</p>
+                    </div>
+                `;
+            });
+        }
+
+        function switchView(viewId) {
+            document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById(`view-${viewId}`).classList.add('active');
+            
+            const titleKey = viewId === 'dashboard' ? 'dashboard' : viewId;
+            document.getElementById('viewTitle').textContent = i18n[state.lang][titleKey] || viewId;
+
+            buildSidebar();
+            playSound('click');
+        }
+
+        function triggerActiveAction(viewId) {
+            if (viewId === 'view-wheel') document.getElementById('spinWheelBtn').click();
+            else if (viewId === 'view-roulette') document.getElementById('spinRouletteBtn').click();
+            else if (viewId === 'view-dice') document.getElementById('rollDiceBtn').click();
+            else if (viewId === 'view-coin') document.getElementById('flipCoinBtn').click();
+            else if (viewId === 'view-number') document.getElementById('generateNumberBtn').click();
+            else if (viewId === 'view-choice') document.getElementById('pickChoiceBtn').click();
+            else if (viewId === 'view-password') document.getElementById('generatePasswordBtn').click();
+            else if (viewId === 'view-color') document.getElementById('generateColorBtn').click();
+        }
+
+        function recordHistory(gameId, text) {
+            if (!state.history[gameId]) state.history[gameId] = [];
+            state.history[gameId].unshift({ text, time: new Date().toLocaleTimeString() });
+            if (state.history[gameId].length > 20) state.history[gameId].pop();
+            localStorage.setItem('dt_history', JSON.stringify(state.history));
+            renderHistory(gameId);
+        }
+
+        function renderHistory(gameId) {
+            const box = document.getElementById(`${gameId}History`);
+            if (!box) return;
+            box.innerHTML = '';
+            (state.history[gameId] || []).forEach(item => {
+                box.innerHTML += `<div class="history-item"><span>${item.text}</span><span style="color:var(--text-muted); font-size:0.75rem;">${item.time}</span></div>`;
+            });
+        }
+
+        function loadAllHistories() {
+            games.forEach(g => renderHistory(g.id));
+        }
+
+        // --- 1. Wheel of Fortune ---
+        let wheelAngle = 0;
+        let isWheelSpinning = false;
+        function initWheel() {
+            const canvas = document.getElementById('wheelCanvas');
+            const ctx = canvas.getContext('2d');
+            let options = document.getElementById('wheelOptions').value.split('\n').filter(o => o.trim() !== '');
+
+            function drawWheel(angle = 0) {
+                const center = canvas.width / 2;
+                const radius = center - 10;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const arc = (2 * Math.PI) / options.length;
+                const colors = ['#0084ff', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+
+                options.forEach((opt, i) => {
+                    const startAngle = angle + i * arc;
+                    const endAngle = startAngle + arc;
+                    ctx.beginPath();
+                    ctx.moveTo(center, center);
+                    ctx.arc(center, center, radius, startAngle, endAngle);
+                    ctx.closePath();
+                    ctx.fillStyle = colors[i % colors.length];
+                    ctx.fill();
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+
+                    ctx.save();
+                    ctx.translate(center, center);
+                    ctx.rotate(startAngle + arc / 2);
+                    ctx.textAlign = 'right';
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 14px "Plus Jakarta Sans"';
+                    ctx.fillText(opt.substring(0, 15), radius - 20, 6);
+                    ctx.restore();
+                });
+            }
+
+            drawWheel();
+
+            document.getElementById('updateWheelBtn').addEventListener('click', () => {
+                options = document.getElementById('wheelOptions').value.split('\n').filter(o => o.trim() !== '');
+                drawWheel(0);
+                playSound('click');
+            });
+
+            document.getElementById('spinWheelBtn').addEventListener('click', () => {
+                if (isWheelSpinning || options.length === 0) return;
+                isWheelSpinning = true;
+                playSound('spin');
+
+                const spinAngle = Math.random() * Math.PI * 2 + Math.PI * 10;
+                const duration = 3000;
+                const start = performance.now();
+
+                function animateWheel(now) {
+                    const elapsed = now - start;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const easeOut = 1 - Math.pow(1 - progress, 3);
+                    const currentAngle = wheelAngle + spinAngle * easeOut;
+
+                    drawWheel(currentAngle);
+                    if (progress < 1) {
+                        requestAnimationFrame(animateWheel);
+                    } else {
+                        wheelAngle = currentAngle % (Math.PI * 2);
+                        isWheelSpinning = false;
+                        
+                        const arc = (2 * Math.PI) / options.length;
+                        const normalizedAngle = (2 * Math.PI - (wheelAngle % (Math.PI * 2))) % (Math.PI * 2);
+                        const winningIndex = Math.floor(normalizedAngle / arc) % options.length;
+                        const winner = options[winningIndex];
+
+                        document.getElementById('wheelWinner').textContent = winner;
+                        recordHistory('wheel', winner);
+                        playSound('win');
+                    }
+                }
+                requestAnimationFrame(animateWheel);
+            });
+        }
+
+        // --- 2. Roulette ---
+        function initRoulette() {
+            const strip = document.getElementById('rouletteStrip');
+            let items = document.getElementById('rouletteItems').value.split('\n').filter(i => i.trim() !== '');
+
+            function buildStrip(arr) {
+                strip.innerHTML = '';
+                // Repeat items to form a long track
+                const fullList = [];
+                for (let i = 0; i < 5; i++) fullList.push(...arr);
+                fullList.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'roulette-card-item';
+                    div.textContent = item;
+                    strip.appendChild(div);
+                });
+            }
+            buildStrip(items);
+
+            document.getElementById('updateRouletteBtn').addEventListener('click', () => {
+                items = document.getElementById('rouletteItems').value.split('\n').filter(i => i.trim() !== '');
+                buildStrip(items);
+                playSound('click');
+            });
+
+            let isRouletteSpinning = false;
+            document.getElementById('spinRouletteBtn').addEventListener('click', () => {
+                if (isRouletteSpinning || items.length === 0) return;
+                isRouletteSpinning = true;
+                playSound('spin');
+
+                buildStrip(items);
+                const cardWidth = 110;
+                const totalCards = items.length * 5;
+                const targetIndex = Math.floor(items.length * 2 + Math.random() * items.length);
+                const offset = targetIndex * cardWidth - 250 + (cardWidth / 2);
+
+                strip.style.transition = 'transform 3.5s cubic-bezier(0.15, 0.85, 0.25, 1)';
+                strip.style.transform = `translateX(-${offset}px)`;
+
+                setTimeout(() => {
+                    isRouletteSpinning = false;
+                    const winner = items[targetIndex % items.length];
+                    document.getElementById('rouletteWinner').textContent = winner;
+                    recordHistory('roulette', winner);
+                    playSound('win');
+                }, 3500);
+            });
+        }
+
+        // --- 3. Dice Roll ---
+        function initDice() {
+            const container = document.getElementById('diceStageContainer');
+            const countSelect = document.getElementById('diceCountSelect');
+
+            function renderDiceStage(count, values = [1, 6]) {
+                container.innerHTML = '';
+                for (let i = 0; i < count; i++) {
+                    const val = values[i] || 1;
+                    container.innerHTML += `
+                        <div class="dice-scene">
+                            <div class="dice" id="dice-${i}">
+                                <div class="dice-face face-1"><div class="dot dot-center"></div></div>
+                                <div class="dice-face face-6"><div class="dot d1"></div><div class="dot d2"></div><div class="dot d3"></div><div class="dot d4"></div><div class="dot d5"></div><div class="dot d6"></div></div>
+                                <div class="dice-face face-3"><div class="dot d1"></div><div class="dot d2"></div><div class="dot d3"></div></div>
+                                <div class="dice-face face-4"><div class="dot d1"></div><div class="dot d2"></div><div class="dot d3"></div><div class="dot d4"></div></div>
+                                <div class="dice-face face-2"><div class="dot d1"></div><div class="dot d2"></div></div>
+                                <div class="dice-face face-5"><div class="dot d1"></div><div class="dot d2"></div><div class="dot d3"></div><div class="dot d4"></div><div class="dot d5"></div></div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            renderDiceStage(2);
+
+            countSelect.addEventListener('change', () => {
+                renderDiceStage(parseInt(countSelect.value));
+                playSound('click');
+            });
+
+            document.getElementById('rollDiceBtn').addEventListener('click', () => {
+                playSound('spin');
+                const count = parseInt(countSelect.value);
+                const results = [];
+                const rotations = {
+                    1: { x: 0, y: 0 },
+                    2: { x: -90, y: 0 },
+                    3: { x: 0, y: -90 },
+                    4: { x: 0, y: 90 },
+                    5: { x: 90, y: 0 },
+                    6: { x: 0, y: 180 }
+                };
+
+                for (let i = 0; i < count; i++) {
+                    const val = Math.floor(Math.random() * 6) + 1;
+                    results.push(val);
+                    const diceEl = document.getElementById(`dice-${i}`);
+                    if (diceEl) {
+                        const rx = rotations[val].x + (Math.random() > 0.5 ? 360 : -360) * 2;
+                        const ry = rotations[val].y + (Math.random() > 0.5 ? 360 : -360) * 2;
+                        diceEl.style.transition = 'transform 1.2s cubic-bezier(0.15, 0.85, 0.25, 1.15)';
+                        diceEl.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+                    }
+                }
+
+                setTimeout(() => {
+                    const total = results.reduce((a, b) => a + b, 0);
+                    document.getElementById('diceWinner').textContent = `${results.join(' + ')} = ${total}`;
+                    recordHistory('dice', `${results.join(', ')} (Sum: ${total})`);
+                    playSound('win');
+                }, 1200);
+            });
+        }
+
+        // --- 4. Coin Flip ---
+        function initCoin() {
+            let isFlipping = false;
+            let coinRotY = 0;
+
+            document.getElementById('flipCoinBtn').addEventListener('click', () => {
+                if (isFlipping) return;
+                isFlipping = true;
+                playSound('spin');
+
+                const isHeads = Math.random() < 0.5;
+                const coin = document.getElementById('coinElement');
+                coinRotY += 1800 + (isHeads ? 0 : 180);
+                coin.style.transform = `rotateY(${coinRotY}deg)`;
+
+                setTimeout(() => {
+                    isFlipping = false;
+                    const resultText = isHeads ? (state.lang === 'ru' ? 'ОРЁЛ' : 'HEADS') : (state.lang === 'ru' ? 'РЕШКА' : 'TAILS');
+                    document.getElementById('coinWinner').textContent = resultText;
+                    recordHistory('coin', resultText);
+                    playSound('win');
+                }, 1500);
+            });
+        }
+
+        // --- 5. Random Number ---
+        function initNumber() {
+            document.getElementById('generateNumberBtn').addEventListener('click', () => {
+                playSound('spin');
+                const min = parseInt(document.getElementById('numMin').value) || 1;
+                const max = parseInt(document.getElementById('numMax').value) || 100;
+                const res = Math.floor(Math.random() * (max - min + 1)) + min;
+                
+                document.getElementById('numberWinner').textContent = res;
+                recordHistory('number', res);
+                playSound('win');
+            });
+        }
+
+        // --- 6. Random Choice ---
+        function initChoice() {
+            document.getElementById('pickChoiceBtn').addEventListener('click', () => {
+                playSound('spin');
+                const options = document.getElementById('choiceOptions').value.split('\n').filter(o => o.trim() !== '');
+                if (options.length === 0) return;
+                const res = options[Math.floor(Math.random() * options.length)];
+                
+                document.getElementById('choiceWinner').textContent = res;
+                recordHistory('choice', res);
+                playSound('win');
+            });
+        }
+
+        // --- 7. Password Generator ---
+        function initPassword() {
+            const range = document.getElementById('pwdLength');
+            range.addEventListener('input', () => {
+                document.getElementById('pwdLenVal').textContent = range.value;
+            });
+
+            document.getElementById('generatePasswordBtn').addEventListener('click', () => {
+                playSound('click');
+                const len = parseInt(range.value);
+                const upper = document.getElementById('pwdUpper').checked;
+                const lower = document.getElementById('pwdLower').checked;
+                const numbers = document.getElementById('pwdNumbers').checked;
+                const symbols = document.getElementById('pwdSymbols').checked;
+
+                let chars = '';
+                if (upper) chars += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                if (lower) chars += 'abcdefghijklmnopqrstuvwxyz';
+                if (numbers) chars += '0123456789';
+                if (symbols) chars += '!@#$%^&*()_+-=[]{}|;:,.<>?';
+
+                if (!chars) chars = 'abcdefghijklmnopqrstuvwxyz';
+
+                let pwd = '';
+                for (let i = 0; i < len; i++) {
+                    pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+
+                document.getElementById('passwordWinner').textContent = pwd;
+                recordHistory('password', pwd);
+            });
+
+            document.getElementById('copyPasswordBtn').addEventListener('click', () => {
+                const pwd = document.getElementById('passwordWinner').textContent;
+                if (pwd && pwd !== '-') {
+                    navigator.clipboard.writeText(pwd);
+                    playSound('click');
+                    const btn = document.getElementById('copyPasswordBtn');
+                    btn.textContent = 'Copied!';
+                    setTimeout(() => btn.textContent = i18n[state.lang].copy || 'Copy', 1500);
+                }
+            });
+        }
+
+        // --- 8. Color Generator ---
+        function initColor() {
+            document.getElementById('generateColorBtn').addEventListener('click', () => {
+                playSound('spin');
+                const r = Math.floor(Math.random() * 256);
+                const g = Math.floor(Math.random() * 256);
+                const b = Math.floor(Math.random() * 256);
+                
+                const hex = '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
+                const rgb = `rgb(${r}, ${g}, ${b})`;
+                
+                // convert to hsl
+                let rNorm = r / 255, gNorm = g / 255, bNorm = b / 255;
+                let max = Math.max(rNorm, gNorm, bNorm), min = Math.min(rNorm, gNorm, bNorm);
+                let h, s, l = (max + min) / 2;
+                if (max === min) {
+                    h = s = 0;
+                } else {
+                    let d = max - min;
+                    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                    switch (max) {
+                        case rNorm: h = (gNorm - bNorm) / d + (gNorm < bNorm ? 6 : 0); break;
+                        case gNorm: h = (bNorm - rNorm) / d + 2; break;
+                        case bNorm: h = (rNorm - gNorm) / d + 4; break;
+                    }
+                    h /= 6;
+                }
+                const hsl = `hsl(${Math.round(h * 360)}, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%)`;
+
+                document.getElementById('colorStage').style.backgroundColor = hex;
+                document.getElementById('colorWinner').textContent = hex;
+                document.getElementById('valHex').textContent = hex;
+                document.getElementById('valRgb').textContent = rgb;
+                document.getElementById('valHsl').textContent = hsl;
+
+                recordHistory('color', hex);
+                playSound('win');
+            });
+        }
+
+        // --- Settings Modal ---
+        function initSettingsModal() {
+            const modal = document.getElementById('settingsModal');
+            document.getElementById('settingsBtn').addEventListener('click', () => {
+                modal.classList.add('open');
+                playSound('click');
+            });
+            document.getElementById('closeSettingsModal').addEventListener('click', () => {
+                modal.classList.remove('open');
+                playSound('click');
+            });
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.classList.remove('open');
+            });
+
+            const langSelect = document.getElementById('langSelect');
+            langSelect.value = state.lang;
+            langSelect.addEventListener('change', () => {
+                applyLang(langSelect.value);
+                playSound('click');
+            });
+
+            const soundCheck = document.getElementById('soundEnabledCheck');
+            soundCheck.checked = state.sound;
+            soundCheck.addEventListener('change', () => {
+                state.sound = soundCheck.checked;
+                localStorage.setItem('dt_sound', state.sound);
+                playSound('click');
+            });
+
+            const shortcutInput = document.getElementById('shortcutInput');
+            shortcutInput.value = state.shortcut;
+            shortcutInput.addEventListener('keydown', (e) => {
+                e.preventDefault();
+                state.shortcut = e.key;
+                shortcutInput.value = e.key;
+                localStorage.setItem('dt_shortcut', e.key);
+            });
+        }
+    </script>
+</body>
+</html>

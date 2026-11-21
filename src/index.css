@@ -1,0 +1,192 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root,
+[data-accent="cobalt"] {
+  --dt-accent: #2563eb;
+  --dt-accent-hover: #1d4ed8;
+  --dt-accent-soft: rgba(37, 99, 235, 0.12);
+  --dt-accent-text: #2563eb;
+}
+.dark[data-accent="cobalt"],
+.dark [data-accent="cobalt"] {
+  --dt-accent-text: #60a5fa;
+}
+
+[data-accent="emerald"] {
+  --dt-accent: #059669;
+  --dt-accent-hover: #047857;
+  --dt-accent-soft: rgba(5, 150, 105, 0.12);
+  --dt-accent-text: #059669;
+}
+.dark[data-accent="emerald"],
+.dark [data-accent="emerald"] {
+  --dt-accent-text: #34d399;
+}
+
+[data-accent="amber"] {
+  --dt-accent: #d97706;
+  --dt-accent-hover: #b45309;
+  --dt-accent-soft: rgba(217, 119, 6, 0.14);
+  --dt-accent-text: #b45309;
+}
+.dark[data-accent="amber"],
+.dark [data-accent="amber"] {
+  --dt-accent-text: #fbbf24;
+}
+
+[data-accent="rose"] {
+  --dt-accent: #e11d48;
+  --dt-accent-hover: #be123c;
+  --dt-accent-soft: rgba(225, 29, 72, 0.12);
+  --dt-accent-text: #e11d48;
+}
+.dark[data-accent="rose"],
+.dark [data-accent="rose"] {
+  --dt-accent-text: #fb7185;
+}
+
+@layer base {
+  html {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: clip;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    overflow-x: clip;
+  }
+
+  button,
+  [role="button"],
+  a,
+  select,
+  input[type="checkbox"],
+  input[type="range"] {
+    touch-action: manipulation;
+  }
+
+  .font-mono {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+.dt-btn-primary {
+  background-color: var(--dt-accent);
+  color: #ffffff;
+}
+.dt-btn-primary:hover:not(:disabled) {
+  background-color: var(--dt-accent-hover);
+}
+.dt-text-accent {
+  color: var(--dt-accent-text);
+}
+.dt-bg-accent-soft {
+  background-color: var(--dt-accent-soft);
+}
+.dt-accent-control {
+  accent-color: var(--dt-accent);
+}
+.dt-border-accent {
+  border-color: var(--dt-accent);
+}
+.group:hover .dt-group-hover-accent {
+  background-color: var(--dt-accent);
+  color: #ffffff;
+}
+
+/* Stage Mode (Fullscreen Presentation) */
+[data-stage-mode="true"] .tool-grid {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+[data-stage-mode="true"] .tool-sidebar {
+  display: none !important;
+}
+[data-stage-mode="true"] .tool-stage {
+  min-height: calc(100vh - 6rem);
+  min-height: calc(100dvh - 6rem);
+}
+[data-stage-mode="true"] .shell-canvas-wrap {
+  height: clamp(280px, calc(100vh - 14rem), 760px);
+  height: clamp(280px, calc(100dvh - 14rem), 760px);
+}
+
+/* 3D Coin Scene */
+.coin-scene {
+  perspective: 1100px;
+}
+
+.coin-3d {
+  transform-style: preserve-3d;
+  transition: transform 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.coin-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.coin-face-back {
+  transform: rotateY(180deg);
+}
+
+/* 3D Dice Scene */
+.dice-scene {
+  perspective: 900px;
+}
+
+.dice-cube {
+  transform-style: preserve-3d;
+  transition: transform 1.05s cubic-bezier(0.18, 0.89, 0.25, 1.08);
+}
+
+.dice-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.dice-face-1 { transform: rotateY(0deg) translateZ(52px); }
+.dice-face-6 { transform: rotateY(180deg) translateZ(52px); }
+.dice-face-3 { transform: rotateY(90deg) translateZ(52px); }
+.dice-face-4 { transform: rotateY(-90deg) translateZ(52px); }
+.dice-face-2 { transform: rotateX(90deg) translateZ(52px); }
+.dice-face-5 { transform: rotateX(-90deg) translateZ(52px); }
+
+/* 3D Flip Card Scene */
+.flip-card-scene {
+  perspective: 1000px;
+}
+
+.flip-card-inner {
+  transform-style: preserve-3d;
+  transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.flip-card-inner.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.flip-card-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.flip-card-back {
+  transform: rotateY(180deg);
+}
+
+/* Reduced Motion Respect */
+@media (prefers-reduced-motion: reduce) {
+  .coin-3d,
+  .dice-cube,
+  .flip-card-inner {
+    transition-duration: 0.15s !important;
+  }
+}
